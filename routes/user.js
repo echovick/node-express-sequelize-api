@@ -8,35 +8,10 @@ const UserController = require('../controllers/userController'); // Import user 
 const userController = new UserController();
 
 // Register a new user
-router.post("/register", async (req, res) => {
-  try {
-    const user = await User.create(req.body);
-    const token = generateToken(user);
-    res.cookie("token", token, { httpOnly: true });
-    res.status(201).json({ user });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+router.post("/register", userController.register);
 
 // Login user and generate a token
-router.post("/login", async (req, res) => {
-  try {
-    console.error(User());
-    const { email, password } = req.body;
-    const user = await User.findOne({ where: { email } });
-
-    if (!user || user.password !== password) {
-      throw new Error("Invalid login credentials");
-    }
-
-    const token = generateToken(user);
-    res.cookie("token", token, { httpOnly: true });
-    res.status(200).json({ user });
-  } catch (error) {
-    res.status(401).json({ error: error.message });
-  }
-});
+router.post("/login", userController.login);
 
 // Protected route (requires authentication)
 router.get("/profile", requireAuth, async (req, res) => {
@@ -55,6 +30,5 @@ router.get("/hello", (req, res) => {
 });
 
 // GET route that returns "Hello World" using the UserController
-router.get('/hello', userController.index);
 
 module.exports = router;

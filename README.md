@@ -1,4 +1,4 @@
-# \node-express-sequelize-api
+# node-express-sequelize-api
 
 ## Installation
 
