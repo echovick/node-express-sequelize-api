@@ -12,11 +12,34 @@ const generateToken = (user) => {
   return jwt.sign(payload, secretKey, options);
 };
 
-// Middleware to protect routes with JWT
-const requireAuth = expressJwt({
-    secret: jwtSecret,
-    algorithms: ['HS256'],
-    getToken: (req) => req.cookies.token, // Adjust this based on where your JWT token is located
-});
+function verifyAccessToken(token) {
+  const secret = 'marandmorapp-secret-key';
 
-module.exports = { generateToken, requireAuth };
+  try {
+    const decoded = jwt.verify(token, secret);
+    return { success: true, data: decoded };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+// Middleware to protect routes with JWT
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.sendStatus(401);
+  }
+
+  const result = verifyAccessToken(token);
+
+  if (!result.success) {
+    return res.status(403).json({ error: result.error });
+  }
+
+  req.user = result.data;
+  next();
+}
+
+module.exports = { generateToken, authenticateToken };
